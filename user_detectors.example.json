@@ -1,0 +1,4 @@
+[
+ {"module": "pm_seg_backend.backend", "factory": "make_backend",
+  "path": "C:/path/to/pebblemapper-backend-segmenteverygrain"}
+]

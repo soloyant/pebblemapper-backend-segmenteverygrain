@@ -1,0 +1,19 @@
+# The environment the adapter runs segmenteverygrain in. CUDA 12.1 wheels;
+# swap the torch index for the CPU wheel on a machine without an NVIDIA GPU.
+# sam2 is a source distribution: install torch first, then sam2 with
+# --no-build-isolation and SAM2_BUILD_CUDA=0 (see README.md).
+name: pm-seg
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - --index-url https://download.pytorch.org/whl/cu121
+      - --extra-index-url https://pypi.org/simple
+      - torch==2.5.1+cu121
+      - torchvision==0.20.1+cu121
+      - tensorflow==2.19.1
+      - segmenteverygrain==0.5.0
+      - matplotlib<3.9
+      - pillow-heif
