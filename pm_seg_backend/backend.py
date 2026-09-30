@@ -1,4 +1,4 @@
-"""Segment Every Grain (Sylvester et al., 2025) as a PebbleMapper detection backend.
+"""Segmenteverygrain (Sylvester et al., 2025) as a PebbleMapper detection backend.
 
 Declared through ``user_detectors.json`` (``{"module": "pm_seg_backend.backend",
 "factory": "make_backend", "path": "<this repository>"}``); no PebbleMapper
@@ -42,7 +42,7 @@ CITATION = ("Sylvester, Z., Stockli, D. F., Howes, N., Roberts, K., Malkowski, "
 
 INFO = BackendInfo(
     name="seg",
-    display_name="Segment Every Grain (Sylvester)",
+    display_name="Segmenteverygrain (Sylvester)",
     framework="tensorflow+pytorch",
     license=("Apache-2.0 (segmenteverygrain code, Copyright 2023 Zoltan Sylvester); "
              "Apache-2.0 (SAM 2.1 code and sam2.1_hiera_large.pt weights, Meta); "

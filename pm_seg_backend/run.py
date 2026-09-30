@@ -1,4 +1,4 @@
-"""Segment Every Grain backend: subprocess entry point (runs in conda env 'pm-seg').
+"""Segmenteverygrain backend: subprocess entry point (runs in conda env 'pm-seg').
 
 Reads the PebbleMapper job spec (``--spec <json>``), runs segmenteverygrain
 (U-Net prompts + SAM 2.1 masks) on each job image and writes, for each job,
@@ -146,7 +146,7 @@ def _scores(labels, image_pred, n):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Segment Every Grain backend for PebbleMapper.")
+    ap = argparse.ArgumentParser(description="Segmenteverygrain backend for PebbleMapper.")
     ap.add_argument("--spec", required=True)
     args = ap.parse_args(argv)
     with open(args.spec, "r", encoding="utf-8") as fh:
