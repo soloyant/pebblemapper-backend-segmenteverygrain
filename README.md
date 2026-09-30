@@ -123,7 +123,7 @@ Also cite SAM 2 (Ravi et al., 2024).
 ## The same photograph through every model
 
 The rectified quadrat photograph of PebbleMapper's `example_03_Etretat` (IMG_0955: 0.84 m
-frame, 0.567 mm/px, a densely packed flint beach, 1,362 surface clasts outlined by hand)
+frame, 0.567 mm/px, a densely packed flint beach, 1,362 fully visible pebbles outlined by hand)
 was run through every model PebbleMapper can use, with the frame band left out and each
 clast measured by PebbleMapper's own step. The ImageGrains plug-in provides two models,
 ImageGrains 2.0 and 1.2.
@@ -145,11 +145,10 @@ precision is true positives over the detections, and F1 is their harmonic mean. 
 negatives (1,362 minus true positives) and false positives (detections minus true
 positives) follow from the table. Length RMSE is computed on the true positives.
 
-The hand outlines leave out many of the smallest grains between the larger clasts, so a
-detection with no hand-outlined partner is not necessarily wrong, and precision is a
-lower bound. ImageGrains 2.0 outlines most of those small grains, which is why its D50 is
-lower. The hand outlines started from Segmenteverygrain's detections, which favours
-that model here. Times are for one photograph once the model is loaded (loading adds 7 to
+The hand outlines keep only the pebbles lying fully visible on top of the sediment;
+partly buried and overlapping pebbles were removed by hand. This is the rule Mask R-CNN's
+training labels follow. The hand outlines were started from Segmenteverygrain's
+detections. Times are for one photograph once the model is loaded (loading adds 7 to
 70 s once per run), on a 2018 laptop (Intel Core i7-8850H, NVIDIA Quadro P600 with 4 GB).
 ImageGrains 1.2 and PebbleCountsAuto run on the CPU.
 
