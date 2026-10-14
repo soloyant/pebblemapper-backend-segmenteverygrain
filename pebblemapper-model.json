@@ -1,0 +1,14 @@
+{
+ "id": "segmenteverygrain",
+ "backends": [
+  {"name": "seg", "display_name": "Segmenteverygrain (Sylvester)",
+   "package": "pm_seg_backend", "module": "backend", "factory": "make_backend"}
+ ],
+ "authors": "Sylvester, Z., Stockli, D. F., Howes, N., et al.",
+ "citation": "Sylvester, Z., Stockli, D. F., Howes, N., Roberts, K., Malkowski, M. A., Poros, Z., Martindale, R. C., & Bai, W. (2025). Segmenteverygrain: A Python module for segmentation of grains in images. Journal of Open Source Software, 10(112), 7953. https://doi.org/10.21105/joss.07953",
+ "licence_code": "Apache-2.0 (segmenteverygrain, SAM 2); MIT (adapter)",
+ "licence_weights": "Apache-2.0 (U-Net weights, segmenteverygrain repository; SAM 2.1 weights, Meta)",
+ "description": "U-Net prompts and Segment Anything 2.1 masks for grain outlines (segmenteverygrain 0.5.0). Score is the mean U-Net grain probability under the outline.",
+ "homepage": "https://github.com/soloyant/pebblemapper-backend-segmenteverygrain",
+ "runs_in": "own"
+}

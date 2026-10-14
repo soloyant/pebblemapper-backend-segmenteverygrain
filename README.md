@@ -25,6 +25,18 @@ weights are not included; a script downloads them from their authors.
 
 ## Installation
 
+**From PebbleMapper (Windows).** Open the **Models** tab, or click **Add a model…** under
+*Detection model* in the left drawer, and click **Install** beside Segmenteverygrain.
+PebbleMapper downloads this repository's release, the exact software environment the release
+was tested with (including a ready-built `sam2` wheel, so nothing is compiled on your
+computer), the U-Net weights from the segmenteverygrain repository and the SAM 2.1 weights
+from Meta's Hugging Face page, both at fixed revisions, checks every file against its
+checksum, runs the model once on a test photograph, and adds it to the Detection model list.
+`check.jpg`, that test photograph, is a crop of `example_02a` from PebbleMapper's example data
+(© Antoine Soloy, CC BY 4.0).
+
+**By hand** (other systems, or to work on the adapter):
+
 1. Create the environment and install the packages. `sam2` is a source distribution, so
    install PyTorch first and build `sam2` without isolation. From this folder:
 

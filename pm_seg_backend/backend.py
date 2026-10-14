@@ -18,6 +18,7 @@ in ortho mode.
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 from pathlib import Path
@@ -47,8 +48,10 @@ INFO = BackendInfo(
     license=("Apache-2.0 (segmenteverygrain code, Copyright 2023 Zoltan Sylvester); "
              "Apache-2.0 (SAM 2.1 code and sam2.1_hiera_large.pt weights, Meta); "
              "U-Net weights seg_model_smooth_labels.keras distributed in the "
-             "segmenteverygrain repository under the same Apache-2.0 licence. "
-             "None of it is redistributed with this adapter (MIT)."),
+             "segmenteverygrain repository under the same Apache-2.0 licence; "
+             "MIT (this adapter). The adapter's releases carry an unmodified "
+             "build of SAM 2's code (sam2 1.1.0, Apache-2.0) as a wheel; the "
+             "weights are downloaded from their authors' addresses."),
     output_type="instance",
     env=ENV_NAME,
     in_process=False,
@@ -64,9 +67,12 @@ INFO = BackendInfo(
 )
 
 
-def make_backend():
-    """Zero-argument factory named in user_detectors.json."""
-    return SegBackend()
+def make_backend(ctx=None):
+    """The factory PebbleMapper calls. ``ctx`` is ``None`` when declared by
+    hand in user_detectors.json (it then reads ``PM_SEG_*``), and a
+    ``detectors.base.InstallContext`` when PebbleMapper installed it from its
+    Models tab."""
+    return SegBackend(ctx)
 
 
 class SegBackend(InstanceSubprocessBackend):
@@ -77,11 +83,24 @@ class SegBackend(InstanceSubprocessBackend):
     model_version = "segmenteverygrain 0.5.0"
     log_prefix = "seg"
 
+    def __init__(self, ctx=None):
+        self.weights_dir = WEIGHTS_DIR
+        if ctx is not None:
+            self.env_name = ctx.env_prefix
+            self.variant = ctx.variant
+            self.weights_dir = ctx.weights_dir
+            self.model_version = f"{ctx.release} ({self.model_version})"
+            self.info = dataclasses.replace(
+                INFO, env=str(ctx.env_prefix),
+                weights=f"{ctx.weights_dir / UNET_FILE} + {ctx.weights_dir / SAM_FILE}",
+                install_hint="Installed from PebbleMapper's Models tab; repair "
+                             "or remove it there.")
+
     def is_available(self) -> bool:
         return (_SCRIPT.exists()
-                and (WEIGHTS_DIR / UNET_FILE).exists()
-                and (WEIGHTS_DIR / SAM_FILE).exists()
-                and subprocess_runner.conda_env_exists(ENV_NAME))
+                and (self.weights_dir / UNET_FILE).exists()
+                and (self.weights_dir / SAM_FILE).exists()
+                and subprocess_runner.conda_env_exists(self.env_name))
 
     def spec_params(self, mode, kwargs, resolution):
         log_fn = kwargs.get("log_fn") or (lambda s: None)
@@ -91,4 +110,4 @@ class SegBackend(InstanceSubprocessBackend):
                    "recorded in the manifest but not applied.")
         opts = dict(kwargs.get("seg_options")
                     or json.loads(os.environ.get("PM_SEG_OPTIONS", "{}") or "{}"))
-        return {"weights_dir": str(WEIGHTS_DIR), "seg": opts}
+        return {"weights_dir": str(self.weights_dir), "seg": opts}
