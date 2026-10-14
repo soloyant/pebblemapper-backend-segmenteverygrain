@@ -49,9 +49,11 @@ INFO = BackendInfo(
              "Apache-2.0 (SAM 2.1 code and sam2.1_hiera_large.pt weights, Meta); "
              "U-Net weights seg_model_smooth_labels.keras distributed in the "
              "segmenteverygrain repository under the same Apache-2.0 licence; "
-             "MIT (this adapter). The adapter's releases carry an unmodified "
-             "build of SAM 2's code (sam2 1.1.0, Apache-2.0) as a wheel; the "
-             "weights are downloaded from their authors' addresses."),
+             "MIT (this adapter). The adapter's releases carry unmodified "
+             "builds, as wheels, of three packages PyPI has only as source: "
+             "sam2 1.1.0 (Apache-2.0, Meta), iopath 0.1.10 (MIT, Meta) and "
+             "antlr4-python3-runtime 4.9.3 (BSD-3-Clause); the weights are "
+             "downloaded from their authors' addresses."),
     output_type="instance",
     env=ENV_NAME,
     in_process=False,

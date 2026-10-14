@@ -28,7 +28,8 @@ weights are not included; a script downloads them from their authors.
 **From PebbleMapper (Windows).** Open the **Models** tab, or click **Add a model…** under
 *Detection model* in the left drawer, and click **Install** beside Segmenteverygrain.
 PebbleMapper downloads this repository's release, the exact software environment the release
-was tested with (including a ready-built `sam2` wheel, so nothing is compiled on your
+was tested with (including ready-built wheels of `sam2`, `iopath` and
+`antlr4-python3-runtime`, which PyPI has only as source, so nothing is compiled on your
 computer), the U-Net weights from the segmenteverygrain repository and the SAM 2.1 weights
 from Meta's Hugging Face page, both at fixed revisions, checks every file against its
 checksum, runs the model once on a test photograph, and adds it to the Detection model list.
