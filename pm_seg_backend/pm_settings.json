@@ -102,12 +102,10 @@
   {
    "key": "min_probability",
    "label": "Minimum grain probability",
-   "help": "Each grain's mean U-Net probability, between 0 and 1. Grains below this value are dropped. Higher: fewer, surer grains; 0: none dropped.",
+   "help": "Each grain's mean U-Net probability, between 0 and 1. Grains below this value are dropped. Higher: fewer, surer grains; 0: none dropped. A PebbleMapper filter, not part of segmenteverygrain, so the authors give no value.",
    "unit": "fraction",
    "kind": "number", "min": 0.0, "max": 1.0, "step": 0.05,
    "default": 0.0,
-   "authors": {"value": null, "source": "not part of segmenteverygrain: a PebbleMapper filter"},
-   "differs_because": "a PebbleMapper filter, off by default.",
    "modes": ["quadrat", "ortho"],
    "main": false
   }
