@@ -110,6 +110,12 @@ class SegBackend(InstanceSubprocessBackend):
             log_fn("[seg] note: min_confidence is a Mask R-CNN threshold; "
                    "segmenteverygrain has no detector confidence, so it is "
                    "recorded in the manifest but not applied.")
-        opts = dict(kwargs.get("seg_options")
-                    or json.loads(os.environ.get("PM_SEG_OPTIONS", "{}") or "{}"))
+        # PebbleMapper 1.2+ sends the values the user changed in the model's
+        # Settings (pm_settings.json); 1.1 sends nothing, and the release
+        # then behaves as 1.0.0 did.
+        if kwargs.get("model_options") is not None:
+            opts = dict(kwargs["model_options"])
+        else:
+            opts = dict(kwargs.get("seg_options")
+                        or json.loads(os.environ.get("PM_SEG_OPTIONS", "{}") or "{}"))
         return {"weights_dir": str(self.weights_dir), "seg": opts}

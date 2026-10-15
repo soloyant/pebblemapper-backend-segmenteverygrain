@@ -1,0 +1,119 @@
+{
+ "format": 1,
+ "model": "seg",
+ "shared_controls": ["tile_size", "overlap", "device", "device_number"],
+ "not_used": {
+  "confidence": "Segmenteverygrain gives each grain a probability, not a detector confidence; see 'Minimum grain probability' under More settings.",
+  "dedup": "Segmenteverygrain merges the grains found in its overlapping tiles itself."
+ },
+ "settings": [
+  {
+   "key": "remove_edge_grains",
+   "label": "Remove grains cut by the image edge",
+   "help": "On: grains touching the edge of the image are dropped. Off: they are kept; on a quadrat photograph PebbleMapper removes the frame band itself afterwards.",
+   "kind": "bool",
+   "default": false,
+   "authors": {"value": true, "source": "segmenteverygrain predict_large_image, default"},
+   "differs_because": "PebbleMapper excludes the quadrat frame band after detection, so the grains inside the frame that touch the photograph's edge are kept rather than lost.",
+   "modes": ["quadrat", "ortho"],
+   "main": true
+  },
+  {
+   "key": "overlap",
+   "label": "Overlap of Segmenteverygrain's own tiles",
+   "help": "Segmenteverygrain processes the image in square tiles that overlap by this many pixels. Higher: fewer grains cut where tiles meet, slower. For orthos it is worked out from the Detect tab's Overlap and Tile size unless set here.",
+   "unit": "px",
+   "kind": "number", "min": 0, "max": 2000, "step": 50, "integer": true,
+   "default_by_mode": {"quadrat": 600, "ortho": {"derived": "the Detect tab's Overlap × the tile size in pixels (0.3 × tile when the Overlap is 0), at least 64 px"}},
+   "authors": {"value": 300, "source": "segmenteverygrain predict_large_image, default"},
+   "differs_because": "chosen in PebbleMapper's first Segmenteverygrain release so that grains up to about 600 pixels across lie whole in at least one tile; it was not measured against the authors' value.",
+   "modes": ["quadrat", "ortho"],
+   "main": true
+  },
+  {
+   "key": "min_area",
+   "label": "Minimum grain area",
+   "help": "Grains smaller than this are dropped. Higher: small grains and specks are removed; lower: more small grains kept, some of them noise.",
+   "unit": "px²",
+   "kind": "number", "min": 0, "max": 100000, "step": 10, "integer": true,
+   "default": 100,
+   "authors": {"value": null, "source": "segmenteverygrain predict_large_image: no minimum by default"},
+   "differs_because": "drops specks of a few pixels, which cannot be measured reliably.",
+   "modes": ["quadrat", "ortho"],
+   "main": true
+  },
+  {
+   "key": "patch_size",
+   "label": "Size of Segmenteverygrain's own tiles",
+   "help": "The side of the square tiles Segmenteverygrain processes. Higher: fewer tiles and more context per tile, more graphics memory. For orthos it is worked out from the Detect tab's Tile size.",
+   "unit": "px",
+   "kind": "number", "min": 512, "max": 4096, "step": 64, "integer": true,
+   "default_by_mode": {"quadrat": 2000, "ortho": {"derived": "the Detect tab's Tile size in pixels, between 512 and 4096"}},
+   "authors": {"value": 2000, "source": "segmenteverygrain predict_large_image, default"},
+   "differs_because": "for orthos PebbleMapper follows the Tile size chosen on the Detect tab.",
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  },
+  {
+   "key": "use_sam",
+   "label": "Refine outlines with Segment Anything",
+   "help": "On: the U-Net's grains are outlined by Segment Anything (SAM 2.1), sharper and slower. Off: the U-Net's own outlines are used.",
+   "kind": "bool",
+   "default": true,
+   "authors": {"value": true, "source": "segmenteverygrain predict_large_image, default"},
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  },
+  {
+   "key": "dilation",
+   "label": "Dilation of the U-Net outlines",
+   "help": "Without SAM, each U-Net outline is grown by this many pixels. Higher: larger outlines. It has no effect while SAM is on.",
+   "unit": "px",
+   "kind": "number", "min": 0, "max": 10, "step": 1, "integer": true,
+   "default": 3,
+   "authors": {"value": 0, "source": "segmenteverygrain predict_large_image, default"},
+   "differs_because": "kept from PebbleMapper's first Segmenteverygrain release; it changes nothing while SAM is on, which is the default.",
+   "requires": {"key": "use_sam", "value": false},
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  },
+  {
+   "key": "dbs_max_dist",
+   "label": "Grouping distance of the U-Net prompts",
+   "help": "U-Net points closer than this are grouped into one grain's prompt. Higher: neighbouring grains are more often merged into one; lower: a grain may be split.",
+   "unit": "px",
+   "kind": "number", "min": 1, "max": 200, "step": 1, "integer": false,
+   "default": 20.0,
+   "authors": {"value": 20.0, "source": "segmenteverygrain predict_large_image, default"},
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  },
+  {
+   "key": "min_grain_area",
+   "label": "Smallest grain prompted",
+   "help": "U-Net regions smaller than this get no prompt. Higher: small grains are not looked for.",
+   "unit": "px²",
+   "kind": "number", "min": 0, "max": 10000, "step": 10, "integer": true,
+   "default": 50,
+   "authors": {"value": 50, "source": "segmenteverygrain predict_large_image, default"},
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  },
+  {
+   "key": "min_probability",
+   "label": "Minimum grain probability",
+   "help": "Each grain's mean U-Net probability, between 0 and 1. Grains below this value are dropped. Higher: fewer, surer grains; 0: none dropped.",
+   "unit": "fraction",
+   "kind": "number", "min": 0.0, "max": 1.0, "step": 0.05,
+   "default": 0.0,
+   "authors": {"value": null, "source": "not part of segmenteverygrain: a PebbleMapper filter"},
+   "differs_because": "a PebbleMapper filter, off by default.",
+   "modes": ["quadrat", "ortho"],
+   "main": false
+  }
+ ],
+ "fixed": [
+  {"label": "Segment Anything checkpoint", "value": "sam2.1_hiera_large", "reason": "the checkpoint this release downloads and checks."},
+  {"label": "U-Net model", "value": "seg_model_smooth_labels.keras", "reason": "the model trained by the authors and pinned by this release."}
+ ]
+}

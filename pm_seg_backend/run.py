@@ -17,7 +17,12 @@ to Mask R-CNN. This file must never import the PebbleMapper core.
 Spec params honoured: ``devicemode`` ("gpu"/"cpu"), ``weights_dir``,
 ``metric_cropsize`` + ``resolution`` (ortho patch size), ``seg`` (dict of
 segmenteverygrain options: min_area, dbs_max_dist, min_grain_area, patch_size,
-overlap, remove_edge_grains, use_sam, dilation).
+overlap, remove_edge_grains, use_sam, dilation, min_probability; described in
+``pm_settings.json``).
+
+Each instance file also carries ``resolved``: every value the run used, the
+package versions, the device and the tiles (PebbleMapper 1.2's record of a
+result; older PebbleMapper versions ignore it).
 """
 # Copyright (c) 2026 Antoine Soloy
 # SPDX-License-Identifier: MIT
@@ -133,6 +138,35 @@ def _rasterize(polys, image):
     return seg.rasterize_grains(list(polys), image).astype(np.int32)
 
 
+def _versions():
+    from importlib import metadata
+    out = {}
+    for name in ("segmenteverygrain", "sam2", "torch", "tensorflow", "keras"):
+        try:
+            out[name] = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            pass
+    return out
+
+
+def _device_info(device):
+    if device != "cuda":
+        return {"kind": "cpu", "index": None, "name": "processor"}
+    import torch
+    return {"kind": "cuda", "index": 0, "name": torch.cuda.get_device_name(0)}
+
+
+def _drop_below(labels, scores, threshold):
+    """Remove the grains whose mean probability is below ``threshold`` and
+    number the rest 1..n again; returns (labels, scores, n_dropped)."""
+    if threshold <= 0 or scores.size == 0:
+        return labels, scores, 0
+    keep = np.flatnonzero(scores >= threshold) + 1          # label ids kept
+    lut = np.zeros(scores.size + 1, dtype=np.int32)
+    lut[keep] = np.arange(1, keep.size + 1, dtype=np.int32)
+    return lut[labels], scores[keep - 1], int(scores.size - keep.size)
+
+
 def _scores(labels, image_pred, n):
     """Mean U-Net grain probability (channel 1) under each label, in [0, 1]."""
     if n == 0:
@@ -161,6 +195,7 @@ def main(argv=None):
     log(f"segmenteverygrain backend: mode={mode}, {len(jobs)} job(s), device={device}")
 
     unet, sam = _load_models(weights_dir, device)
+    versions, dev_info = _versions(), _device_info(device)
 
     for ji, job in enumerate(jobs):
         path = job["path"]
@@ -184,9 +219,28 @@ def main(argv=None):
         labels = _rasterize(polys, image)
         n = len(polys)
         scores = _scores(labels, image_pred, n)
+        min_prob = float(seg_opts.get("min_probability", 0.0))
+        labels, scores, dropped = _drop_below(labels, scores, min_prob)
+        if dropped:
+            log(f"  {dropped} grains below the minimum probability {min_prob:g} dropped")
+            n = int(scores.size)
+        used = {
+            "remove_edge_grains": bool(seg_opts.get("remove_edge_grains", False)),
+            "overlap": int(overlap_px), "patch_size": int(patch),
+            "min_area": float(seg_opts.get("min_area", 100.0)),
+            "use_sam": bool(seg_opts.get("use_sam", True)),
+            "dilation": int(seg_opts.get("dilation", 3)),
+            "dbs_max_dist": float(seg_opts.get("dbs_max_dist", 20.0)),
+            "min_grain_area": int(seg_opts.get("min_grain_area", 50)),
+            "min_probability": min_prob,
+        }
+        resolved = {"format": 1, "settings": used, "versions": versions,
+                    "device": dev_info, "reduction": {"factor": 1.0, "reason": ""},
+                    "tiles": {"size_px": int(patch), "overlap_px": int(overlap_px)}}
         os.makedirs(os.path.dirname(out_npz) or ".", exist_ok=True)
         np.savez_compressed(out_npz, labels=labels, scores=scores,
-                            shape=np.array([h, w], dtype=np.int64))
+                            shape=np.array([h, w], dtype=np.int64),
+                            resolved=np.array(json.dumps(resolved)))
         log(f"  {n} grains -> {os.path.basename(out_npz)} ({time.time() - t0:.1f}s)")
     log("done")
     return 0
